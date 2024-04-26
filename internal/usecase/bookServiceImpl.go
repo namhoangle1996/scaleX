@@ -7,11 +7,20 @@ import (
 	"os"
 	"scaleX/internal/dto"
 	"scaleX/internal/repository"
+	"strconv"
 	"sync"
 )
 
 type bookService struct {
 	userRepo repository.UserRepo
+}
+
+const (
+	filePath = "./sampleFile/"
+)
+
+func (b bookService) AddBook(ctx context.Context, request dto.AddBookRequest) error {
+	return insertBookInfoToFile(request)
 }
 
 func (b bookService) FetchBook(ctx context.Context, userId string) (res dto.FetchBookResp, err error) {
@@ -62,9 +71,32 @@ func (b bookService) FetchBook(ctx context.Context, userId string) (res dto.Fetc
 
 }
 
-func readBooksInfoFromFile(fileName string) (bookNames []string, err error) {
-	filePath := "./sampleFile/"
+func insertBookInfoToFile(book dto.AddBookRequest) error {
+	file, err := os.OpenFile(filePath+"regularUser.csv", os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	newData := [][]string{
+		{book.Name, book.Author, strconv.Itoa(book.PublicationYear)},
+	}
+
+	// Ghi dữ liệu mới vào tệp CSV
+	for _, row := range newData {
+		err := writer.Write(row)
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
+func readBooksInfoFromFile(fileName string) (bookNames []string, err error) {
 	file, err := os.Open(filePath + fileName)
 	if err != nil {
 		log.Errorf("Error opening file: ", err)

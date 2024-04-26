@@ -3,6 +3,7 @@ package restHandler
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"scaleX/internal/dto"
 	"scaleX/internal/usecase"
 )
 
@@ -19,8 +20,20 @@ type (
 )
 
 func (h *bookHandler) AddBook(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+
+	var req dto.AddBookRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	err := h.BookService.AddBook(c.Request().Context(), req)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, req)
+
 }
 
 func (h *bookHandler) DeleteBook(c echo.Context) error {
