@@ -36,7 +36,7 @@ func validJwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			if !ok {
 				return echo.NewHTTPError(http.StatusUnauthorized, "InvalidJWTClaims")
 			}
-			c.Set("user_id", userId)
+			c.Set("userId", userId)
 		}
 
 		return next(c)

@@ -3,13 +3,15 @@ package main
 import (
 	"log"
 	"scaleX/internal/handlers/restHandler"
+	"scaleX/internal/repository"
 	"scaleX/internal/usecase"
 )
 
 func main() {
 
-	authService := usecase.NewAuthService()
-	bookService := usecase.NewBookService()
+	userRepo := repository.NewUserRepo()
+	authService := usecase.NewAuthService(userRepo)
+	bookService := usecase.NewBookService(userRepo)
 
 	handler := restHandler.NewRestHandler(authService, bookService)
 

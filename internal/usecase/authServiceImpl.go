@@ -2,16 +2,17 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"scaleX/internal/dto"
+	"scaleX/internal/repository"
 	"scaleX/utils"
 )
 
 type authService struct {
+	userRepo repository.UserRepo
 }
 
 func (a authService) Login(ctx context.Context, req dto.LoginReq) (res dto.LoginResp, err error) {
-	userInfo, err := getUserByUserName(req.UserName)
+	userInfo, err := a.userRepo.GetUserByUserName(ctx, req.UserName)
 	if err != nil {
 		return res, err
 	}
@@ -26,23 +27,8 @@ func (a authService) Login(ctx context.Context, req dto.LoginReq) (res dto.Login
 
 }
 
-func getUserByUserName(userName string) (res dto.UserInfo, err error) {
-	res.UserId = userName
-
-	switch userName {
-	case "userA":
-		res.Role = "regular"
-
-	case "userB":
-		res.Role = "admin"
-	default:
-		return dto.UserInfo{}, errors.New("Unknown User")
+func NewAuthService(userRepo repository.UserRepo) AuthService {
+	return authService{
+		userRepo: userRepo,
 	}
-
-	return res, nil
-
-}
-
-func NewAuthService() AuthService {
-	return authService{}
 }

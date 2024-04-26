@@ -1,5 +1,5 @@
 package dto
 
 type FetchBookResp struct {
-	Names []string `json:"names"`
+	BookNames []string `json:"book_names"`
 }
