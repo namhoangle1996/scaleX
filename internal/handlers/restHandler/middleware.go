@@ -4,6 +4,8 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"scaleX/internal/constants"
+	"scaleX/utils"
 	"strings"
 )
 
@@ -20,7 +22,7 @@ func validJwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, echo.NewHTTPError(http.StatusUnauthorized, "Unexpected signing method")
 			}
-			secret := []byte("JwtSecretKey")
+			secret := []byte(utils.JWTSecretKey)
 			return secret, nil
 		})
 		if err != nil {
@@ -48,7 +50,7 @@ func validJwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 func validateAdminRole(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		role := c.Get("role").(string)
-		if role != "admin" {
+		if role != constants.ADMIN_ROLE {
 			return echo.NewHTTPError(http.StatusForbidden, "Role must be admin")
 		}
 		return next(c)

@@ -158,8 +158,10 @@ func readBooksInfoFromFile(fileName string) (bookNames []string, err error) {
 		return nil, err
 	}
 
-	for _, record := range records {
-		bookNames = append(bookNames, record[0])
+	for i, record := range records {
+		if i > 0 {
+			bookNames = append(bookNames, record[0])
+		}
 	}
 
 	return bookNames, err

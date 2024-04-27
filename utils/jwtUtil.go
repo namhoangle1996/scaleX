@@ -6,19 +6,24 @@ import (
 	"time"
 )
 
+const (
+	JWTSecretKey  = "JwtSecretKey"
+	timeToExpired = 60
+)
+
 func GenerateJWTToken(user *dto.UserInfo) (string, error) {
 	claims := &dto.UserClaimJwt{
 		UserId:   user.UserId,
 		Role:     user.Role,
 		UserName: user.UserName,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 60).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * timeToExpired).Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte("JwtSecretKey"))
+	tokenString, err := token.SignedString([]byte(JWTSecretKey))
 	if err != nil {
 		return "", err
 	}
