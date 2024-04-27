@@ -26,6 +26,10 @@ func (h *bookHandler) AddBook(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
 	err := h.BookService.AddBook(c.Request().Context(), req)
 
 	if err != nil {
@@ -41,6 +45,10 @@ func (h *bookHandler) DeleteBook(c echo.Context) error {
 	var req dto.DeleteBookRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		return err
 	}
 
 	err := h.BookService.DeleteBook(c.Request().Context(), req)

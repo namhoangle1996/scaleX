@@ -1,21 +1,22 @@
 package restHandler
 
 import (
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"scaleX/internal/usecase"
+	"scaleX/utils"
 	"strings"
 )
 
 type RestHandler struct {
 	AuthHandler
 	BookHandler
-	//config
 }
 
 func Echo(h *RestHandler) *echo.Echo {
 	e := echo.New()
-
+	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Pre(middleware.RemoveTrailingSlash())

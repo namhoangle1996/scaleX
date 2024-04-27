@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"scaleX/internal/constants"
 	"scaleX/internal/dto"
 )
 
@@ -13,11 +14,11 @@ func (u userRepo) GetUserById(ctx context.Context, userId string) (res dto.UserI
 	res.UserId = userId
 
 	switch userId {
-	case "regularUserId":
-		res.Role = "regular"
+	case constants.REGULAR_USER_ID:
+		res.Role = constants.REGULAR_ROLE
 
-	case "adminUserId":
-		res.Role = "admin"
+	case constants.ADMIN_USER_ID:
+		res.Role = constants.ADMIN_ROLE
 	default:
 		return res, errors.New("Unknown User")
 	}
@@ -30,13 +31,13 @@ func (u userRepo) GetUserByUserName(ctx context.Context, userName string) (res d
 	res.UserName = userName
 
 	switch userName {
-	case "regular":
-		res.Role = "regular"
-		res.UserId = "regularUserId"
+	case constants.REGULAR_ROLE:
+		res.Role = constants.REGULAR_ROLE
+		res.UserId = constants.REGULAR_USER_ID
 
-	case "admin":
-		res.Role = "admin"
-		res.UserId = "adminUserId"
+	case constants.ADMIN_ROLE:
+		res.Role = constants.ADMIN_ROLE
+		res.UserId = constants.ADMIN_USER_ID
 
 	default:
 		return res, errors.New("Unknown User")
