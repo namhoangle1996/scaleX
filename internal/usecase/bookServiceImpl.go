@@ -23,6 +23,10 @@ func (b bookService) AddBook(ctx context.Context, request dto.AddBookRequest) er
 	return insertBookInfoToFile(request)
 }
 
+func (b bookService) DeleteBook(ctx context.Context, request dto.DeleteBookRequest) error {
+	return deleteBookFromFile(request.Name)
+}
+
 func (b bookService) FetchBook(ctx context.Context, userId string) (res dto.FetchBookResp, err error) {
 	userInfo, err := b.userRepo.GetUserById(ctx, userId)
 	if err != nil {
@@ -94,6 +98,17 @@ func insertBookInfoToFile(book dto.AddBookRequest) error {
 	}
 
 	return err
+}
+
+func deleteBookFromFile(fileName string) error {
+	file, err := os.Open(filePath + fileName)
+	if err != nil {
+		log.Errorf("Error opening file: ", err)
+		return err
+	}
+	defer file.Close()
+
+	return nil
 }
 
 func readBooksInfoFromFile(fileName string) (bookNames []string, err error) {

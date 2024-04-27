@@ -37,8 +37,19 @@ func (h *bookHandler) AddBook(c echo.Context) error {
 }
 
 func (h *bookHandler) DeleteBook(c echo.Context) error {
-	//TODO implement me
-	panic("implement me")
+
+	var req dto.DeleteBookRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	err := h.BookService.DeleteBook(c.Request().Context(), req)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, req)
 }
 
 func (h *bookHandler) FetchBook(c echo.Context) error {
