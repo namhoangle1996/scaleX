@@ -37,8 +37,8 @@ func Echo(h *RestHandler) *echo.Echo {
 	g.POST("/login", h.AuthHandler.Login)
 
 	g.GET("/home", h.BookHandler.FetchBook, validJwtMiddleware)
-	g.POST("/addBook", h.BookHandler.AddBook, validJwtMiddleware)
-	g.DELETE("/deleteBook", h.BookHandler.DeleteBook, validJwtMiddleware)
+	g.POST("/addBook", h.BookHandler.AddBook, validJwtMiddleware, validateAdminRole)
+	g.DELETE("/deleteBook", h.BookHandler.DeleteBook, validJwtMiddleware, validateAdminRole)
 
 	return e
 

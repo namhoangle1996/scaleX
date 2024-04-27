@@ -18,13 +18,13 @@ func validJwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, echo.NewHTTPError(http.StatusInternalServerError, "Unexpected signing method")
+				return nil, echo.NewHTTPError(http.StatusUnauthorized, "Unexpected signing method")
 			}
 			secret := []byte("JwtSecretKey")
 			return secret, nil
 		})
 		if err != nil {
-			return err
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 		}
 
 		if !token.Valid {
@@ -33,12 +33,24 @@ func validJwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userId, ok := claims["user_id"]
+			role, ok := claims["role"]
 			if !ok {
 				return echo.NewHTTPError(http.StatusUnauthorized, "InvalidJWTClaims")
 			}
 			c.Set("userId", userId)
+			c.Set("role", role)
 		}
 
+		return next(c)
+	}
+}
+
+func validateAdminRole(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		role := c.Get("role").(string)
+		if role != "admin" {
+			return echo.NewHTTPError(http.StatusForbidden, "Role must be admin")
+		}
 		return next(c)
 	}
 }
