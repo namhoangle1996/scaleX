@@ -12,6 +12,7 @@ import (
 type RestHandler struct {
 	AuthHandler
 	BookHandler
+	OpenApiHandler
 }
 
 func Echo(h *RestHandler) *echo.Echo {
@@ -45,9 +46,12 @@ func Echo(h *RestHandler) *echo.Echo {
 
 }
 
-func NewRestHandler(authService usecase.AuthService, bookService usecase.BookService) *RestHandler {
+func NewRestHandler(authService usecase.AuthService, bookService usecase.BookService,
+	openApiService usecase.OpenApiService,
+) *RestHandler {
 	return &RestHandler{
-		AuthHandler: &authHandler{authService},
-		BookHandler: &bookHandler{bookService},
+		AuthHandler:    &authHandler{authService},
+		BookHandler:    &bookHandler{bookService},
+		OpenApiHandler: &openApiHandler{openApiService},
 	}
 }
