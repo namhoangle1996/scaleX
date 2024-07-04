@@ -1,61 +1,131 @@
+//package main
+//
+//import (
+//	"bytes"
+//	"encoding/json"
+//	"fmt"
+//	"io/ioutil"
+//	"net/http"
+//	"scaleX/internal/constants"
+//	"scaleX/internal/dto"
+//)
+//
+//// URL API OpenAI
+//
+//func main() {
+//	apiKey := "sk-team2024-home-test-vP00R3HgNtYAroFA1rRbT3BlbkFJ6XTugV2XnCDwPKOnwg18"
+//
+//	// Văn bản chương mẫu để tóm tắt
+//	chapterText := `
+//1
+//WHY YOU SHOULD VISIT CEMETERIES
+//Survivorship Bias
+//No matter where Rick looks, he sees rock stars. They appear on television, on the front pages of magazines, in concert programmes and at online fan sites. Their songs are unavoidable - in the mall, on his playlist, in the gym. The rock stars are everywhere. There are lots of them. And they are successful. Motivated by the stories of countless guitar heroes, Rick starts a band. Will he make it big? The probability lies a fraction above zero. Like so many others, he will most likely end up in the graveyard of failed musicians. This burial ground houses 10,000 times more musicians than the stage does, but no journalist is interested in failures - with the exception of fallen superstars. This makes the cemetery invisible to outsiders.
+//In daily life, because triumph is made more visible than failure, you systematically overestimate your chances of succeeding. As an outsider, you (like Rick) succumb to an illusion, and you mistake how minuscule the probability of success really is. Rick, like so many others, is a victim of Survivorship Bias.
+//Behind every popular author you can find 100 other writers whose books will never sell. Behind them are another 100 who haven't found publishers. Behind them are yet another 100 whose unfinished manuscripts gather dust in drawers.
+//And behind each one of these are 100 people who dream of - one day - writing a book. You, however, hear of only the successful authors (these days, many of them self-published) and fail to recognise how unlikely literary success is. The same goes for photographers, entrepreneurs, artists, athletes, architects, Nobel Prize winners, television presenters and beauty queens. The media is not interested in digging around in the graveyards of the unsuccessful. Nor is this its job. To elude the survivorship bias, you must do the digging yourself.
+//You will also come across survivorship bias when dealing with money and risk: imagine that a friend founds a start-up. You belong to the circle of potential investors and you sense a real opportunity: this could be the next Google. Maybe you'll be lucky. But what is the reality? The most likely scenario is that the company will not even make it off the starting line.
+//`
+//	// Tạo payload request
+//	reqBody := dto.OpenAIRequest{
+//		Model:       "gpt-3.5-turbo",
+//		MaxTokens:   88,
+//		Temperature: 0.7,
+//	}
+//
+//	systemMsg := dto.OpenAIMessage{
+//		Role:    "system",
+//		Content: "Summarize content you are provided with for a second-grade student.",
+//	}
+//
+//	userMsg := dto.OpenAIMessage{
+//		Role:    "user",
+//		Content: chapterText,
+//	}
+//
+//	reqBody.Messages = append(reqBody.Messages, systemMsg, userMsg)
+//
+//	reqBodyJSON, err := json.Marshal(reqBody)
+//	if err != nil {
+//		fmt.Println("Failed to marshal request body:", err)
+//		return
+//	}
+//
+//	fmt.Println("reqBodyJSON", string(reqBodyJSON))
+//
+//	// Tạo HTTP request
+//	req, err := http.NewRequest("POST", constants.OpenaiAPIURL, bytes.NewBuffer(reqBodyJSON))
+//	if err != nil {
+//		fmt.Println("Failed to create request:", err)
+//		return
+//	}
+//	req.Header.Set("Content-Type", "application/json")
+//	req.Header.Set("Authorization", "Bearer "+apiKey)
+//
+//	// Gửi request
+//	client := &http.Client{}
+//	resp, err := client.Do(req)
+//	if err != nil {
+//		fmt.Println("Failed to send request:", err)
+//		return
+//	}
+//	defer resp.Body.Close()
+//
+//	// Đọc và phân tích response
+//	respBody, err := ioutil.ReadAll(resp.Body)
+//	if err != nil {
+//		fmt.Println("Failed to read response body:", err)
+//		return
+//	}
+//
+//	var content dto.OpenAIResponse
+//	err = json.Unmarshal(respBody, &content)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println("resp.Content", content.Choices[0].Message.Content)
+//}
+
 package main
 
 import (
-	"math"
+	"fmt"
+	"os"
+	"regexp"
+	"strings"
 )
 
-func init() {
-}
-
 func main() {
-}
-
-func sol1(n int) (res int64) {
-	var resFloat float64
-	for i := 1; i <= n; i++ {
-		resFloat += math.Pow(float64(i), 2)
-	}
-	return int64(resFloat)
-}
-
-/*
- Write a program that displays the result of total (S) below:
-            S = 1^2 + 2^2 + 3^2 + … + N^2
-
-            Test case 1: N = 10 Test case 2: N = 10^4, Test case 3: N = 10^6 , …
-*
-*/
-
-/*
-Write a program that displays the last 6 digits of S (Fibonacci) below:
-
-	F1 = 0
-	F2 = 1
-	F3 = F1 + F2
-
-S = F1 + F2 + F3 + … + Fn
-Test case 1: N = 10 Test case 2: N = 10^4, Test case 3: N = 10^6 , …
-
-Examples: if S = 123456789 then we display 456789
-
-	if S = 1234 then we display 1234
-*/
-func sol2(n int) (res []int64) {
-	var hmapF = make(map[int]int, n)
-	hmapF[0] = 1
-	hmapF[1] = 1
-
-	var fSlice []int64
-	fSlice = append(fSlice, int64(hmapF[0]), int64(hmapF[1]))
-
-	for i := 2; i < n; i++ {
-		hmapF[i] = hmapF[i-1] + hmapF[i-2]
-		fSlice = append(fSlice, int64(hmapF[i]))
+	// Read the entire content of the file
+	fileContent, err := os.ReadFile("./sampleFile/TheArtOfThinkingClearly.txt")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
 	}
 
-	if len(fSlice) <= 6 {
-		return fSlice
+	// Convert file content to string
+	content := string(fileContent)
+
+	// Define a regular expression to match chapter headers
+	re := regexp.MustCompile(`(?m)^(\d+)\s*\n`)
+
+	// Split content based on the chapter headers
+	splitContent := re.Split(content, -1)
+	fmt.Println("splitContent", splitContent)
+
+	// Find all chapter headers
+	headers := re.FindAllStringSubmatch(content, -1)
+
+	// Create a map to store chapters
+	chapters := make(map[string]string)
+
+	// Iterate over the split content and headers
+	for i, header := range headers {
+		chapters[header[1]] = strings.TrimSpace(splitContent[i+1])
 	}
 
-	return fSlice[len(fSlice)-6:]
+	// Print the chapters
+	for chapter, text := range chapters {
+		fmt.Printf("Chapter %s:\n%s\n\n", chapter, text)
+	}
 }
