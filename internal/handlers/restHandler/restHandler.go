@@ -42,6 +42,9 @@ func Echo(h *RestHandler) *echo.Echo {
 	g.POST("/addBook", h.BookHandler.AddBook, validJwtMiddleware, validateAdminRole)
 	g.DELETE("/deleteBook", h.BookHandler.DeleteBook, validJwtMiddleware, validateAdminRole)
 
+	// openApi handler
+	g.GET("/chapterContent", h.OpenApiHandler.SummarizeChapters)
+
 	return e
 
 }

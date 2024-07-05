@@ -5,5 +5,5 @@ import (
 )
 
 type OpenApiService interface {
-	SummarizeChapters(ctx context.Context) error
+	SummarizeChapters(ctx context.Context) (res map[string]string, error error)
 }

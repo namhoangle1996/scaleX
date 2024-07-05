@@ -17,12 +17,12 @@ type (
 )
 
 func (h *openApiHandler) SummarizeChapters(c echo.Context) error {
-	err := h.OpenApiService.SummarizeChapters(c.Request().Context())
+	res, err := h.OpenApiService.SummarizeChapters(c.Request().Context())
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, nil)
+	return c.JSON(http.StatusOK, res)
 
 }
