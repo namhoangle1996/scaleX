@@ -28,25 +28,47 @@ func (b openApiService) SummarizeChapters(ctx context.Context) (res map[string]s
 	content := string(fileContent)
 	hmapChapterContent := getChapterAndContent(content)
 
-	var wg sync.WaitGroup
-	wg.Add(len(hmapChapterContent))
+	const numWorkers = 5
 
+	var wg sync.WaitGroup
+	jobs := make(chan [2]string, len(hmapChapterContent))
+	results := make(chan [2]string, len(hmapChapterContent))
 	res = make(map[string]string, len(hmapChapterContent))
-	for key, v := range hmapChapterContent {
-		k := key
-		v := v
-		go func() {
-			defer wg.Done()
-			shortContent, err := makeSummarizeRequest(v)
-			if err == nil {
-				res[k] = *shortContent
-			}
-		}()
+
+	// Khởi động các worker
+	for w := 1; w <= numWorkers; w++ {
+		wg.Add(1)
+		go worker(jobs, results, &wg)
 	}
 
+	// Gửi công việc đến các worker
+	for key, v := range hmapChapterContent {
+		jobs <- [2]string{key, v}
+	}
+	close(jobs) // Đóng channel jobs để các worker biết rằng không còn công việc nào
+
+	// Chờ tất cả các worker hoàn thành
 	wg.Wait()
+	close(results)
+
+	// Thu thập kết quả từ các worker
+	for result := range results {
+		key, summary := result[0], result[1]
+		res[key] = summary
+	}
 
 	return res, err
+}
+
+func worker(jobs <-chan [2]string, results chan<- [2]string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for job := range jobs {
+		key, content := job[0], job[1]
+		shortContent, err := makeSummarizeRequest(content)
+		if err == nil {
+			results <- [2]string{key, *shortContent}
+		}
+	}
 }
 
 func makeSummarizeRequest(chapterContent string) (shortContent *string, err error) {
