@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"scaleX/config"
 	"scaleX/internal/constants"
 	"scaleX/internal/dto"
 	"strings"
@@ -17,6 +18,7 @@ import (
 )
 
 type openApiService struct {
+	Configs *config.Config
 }
 
 func (b openApiService) SummarizeChapters(ctx context.Context) (res map[string]string, err error) {
@@ -35,11 +37,12 @@ func (b openApiService) SummarizeChapters(ctx context.Context) (res map[string]s
 	jobs := make(chan dto.ChapterContent, len(hmapChapterContent))
 	results := make(chan dto.ChapterContent, len(hmapChapterContent))
 	res = make(map[string]string, len(hmapChapterContent))
+	openApiKey := b.Configs.OpenApi.ApiKey
 
 	// Create 5 worker
 	for w := 1; w <= numWorkers; w++ {
 		wg.Add(1)
-		go worker(jobs, results, &wg)
+		go worker(jobs, results, openApiKey, &wg)
 	}
 
 	// Push work into workers
@@ -63,11 +66,11 @@ func (b openApiService) SummarizeChapters(ctx context.Context) (res map[string]s
 	return res, err
 }
 
-func worker(jobs <-chan dto.ChapterContent, results chan<- dto.ChapterContent, wg *sync.WaitGroup) {
+func worker(jobs <-chan dto.ChapterContent, results chan<- dto.ChapterContent, openApiKey string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for job := range jobs {
 		log.Info("Doing job with chapter ", job.Chapter)
-		shortContent, err := makeSummarizeRequest(job.Content)
+		shortContent, err := makeSummarizeRequest(openApiKey, job.Content)
 		job.Content = *shortContent
 		if err == nil {
 			results <- job
@@ -78,8 +81,8 @@ func worker(jobs <-chan dto.ChapterContent, results chan<- dto.ChapterContent, w
 	}
 }
 
-func makeSummarizeRequest(chapterContent string) (shortContent *string, err error) {
-	apiKey := "sk-team2024-home-test-vP00R3HgNtYAroFA1rRbT3BlbkFJ6XTugV2XnCDwPKOnwg18" // need to put it on .env
+func makeSummarizeRequest(openApiKey string, chapterContent string) (shortContent *string, err error) {
+	apiKey := openApiKey
 
 	reqBody := dto.OpenAIRequest{
 		Model:       "gpt-3.5-turbo",
@@ -159,6 +162,8 @@ func getChapterAndContent(allContent string) (res map[string]string) {
 	return res
 }
 
-func NewOpenApiService() OpenApiService {
-	return &openApiService{}
+func NewOpenApiService(configs *config.Config) OpenApiService {
+	return &openApiService{
+		Configs: configs,
+	}
 }

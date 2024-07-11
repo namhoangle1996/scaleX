@@ -1,0 +1,5 @@
+application:
+  port: :8888
+  openApiMaxWorker: 5
+openApi:
+  apiKey: "sk-team2024-home-test-vP00R3HgNtYAroFA1rRbT3BlbkFJ6XTugV2XnCDwPKOnwg18"
