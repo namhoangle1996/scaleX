@@ -1,11 +1,16 @@
 package main
 
 import (
-	"log"
+	"context"
+	"errors"
+	"net/http"
+	"os"
+	"os/signal"
 	"scaleX/config"
 	"scaleX/internal/handlers/restHandler"
 	"scaleX/internal/repository"
 	"scaleX/internal/usecase"
+	"time"
 )
 
 func main() {
@@ -24,6 +29,20 @@ func main() {
 
 	echoServer := restHandler.Echo(handler)
 
-	log.Fatal("failed to start server", echoServer.Start(configs.Application.Port))
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	go func() {
+		if err := echoServer.Start(configs.Application.Port); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			echoServer.Logger.Fatal("shutting down the server")
+		}
+	}()
+
+	<-ctx.Done()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := echoServer.Shutdown(ctx); err != nil {
+		echoServer.Logger.Fatal(err)
+	}
 
 }
